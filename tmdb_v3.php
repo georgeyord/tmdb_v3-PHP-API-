@@ -23,25 +23,26 @@
 *
 * Function List
 *   public function  __construct($apikey,$lang='en')
-*   public function setLang($lang="en") 
-*   public function getLang() 
-*   public function setImageURL($config) 
-*   public function getImageURL($size="original") 
-*   public function movieTitles($idMovie) 
+*   public function setLang($lang="en")
+*   public function getLang()
+*   public function setImageURL($config)
+*   public function getImageURL($size="original")
+*   public function movieTitles($idMovie)
 *   public function movieTrans($idMovie)
-*   public function movieTrailer($idMovie,$source="") 
+*   public function movieTrailer($idMovie,$source="")
 *   public function movieDetail($idMovie)
 *   public function moviePoster($idMovie)
 *   public function movieCast($idMovie)
 *   public function movieInfo($idMovie,$option="",$print=false)
 *   public function searchMovie($movieTitle)
-*   public function getConfig() 
-*   public function latestMovie() 
-*   public function nowPlayingMovies($page=1) 
+*   public function find($id,$externalSource)
+*   public function getConfig()
+*   public function latestMovie()
+*   public function nowPlayingMovies($page=1)
 *
 *   private function _call($action,$text,$lang="")
-*   private function setApikey($apikey) 
-*   private function getApikey() 
+*   private function setApikey($apikey)
+*   private function getApikey()
 
 URL LIST:
 configuration		http://api.themoviedb.org/3/configuration
@@ -93,7 +94,7 @@ class TMDBv3{
 		public function  __construct($apikey,$lang='en') {
 			//Assign Api Key
 			$this->setApikey($apikey);
-		
+
 			//Setting Language
 			$this->setLang($lang);
 
@@ -213,7 +214,7 @@ class TMDBv3{
 			$posters = $this->movieInfo($idMovie,"images",false);
 			$posters =$posters['posters'];
 			return $posters;
-		}//end of 
+		}//end of
 
 	/**
 	* movie Casting
@@ -228,6 +229,7 @@ class TMDBv3{
 			}
 			return $casting;
 		}//end of movieCast
+
 
 	/**
 	* Movie Info
@@ -246,15 +248,29 @@ class TMDBv3{
 	* http://api.themoviedb.org/3/search/movie?api_keyf&language&query=future
 	* @param string  $peopleName
 	*/
-		public function searchMovie($movieTitle){
+		public function searchMovie($movieTitle,$text=''){
 			$movieTitle="query=".urlencode($movieTitle);
-			return $this->_call("search/movie",$movieTitle,$this->_lang);
+			return $this->_call("search/movie",$movieTitle.$text,$this->_lang);
 		}//end of searchMovie
 
 
 	/**
+	* Find Movie
+	* http://api.themoviedb.org/3/find/{id}?api_key
+         * @param string $id
+         * @param string $externalSource from these options
+         *  Movies: imdb_id
+         *  People: imdb_id, freebase_mid, freebase_id, tvrage_id
+         *  TV Series: imdb_id, freebase_mid, freebase_id, tvdb_id, tvrage_id
+         */
+		public function find($id,$externalSource = 'imdb_id'){
+			$text="external_source=".urlencode($externalSource);
+			return $this->_call("find/".$id,$text);
+		}//end of findMovie
+
+	/**
 	* Get Confuguration of API
-	* configuration	
+	* configuration
 	* http://api.themoviedb.org/3/configuration?apikey
 	* @return array
 	*/
@@ -290,7 +306,7 @@ class TMDBv3{
 		// # http://api.themoviedb.org/3/movie/11?api_key=XXX
 			$lang=(empty($lang))?$this->getLang():$lang;
 			$url= TMDBv3::_API_URL_.$action."?api_key=".$this->getApikey()."&language=".$lang."&".$text;
-			// echo "<pre>$url</pre>";
+			//echo "<pre>$url</pre>";
 			$ch = curl_init();
 				curl_setopt($ch, CURLOPT_URL, $url);
 				curl_setopt($ch, CURLOPT_HEADER, 0);
